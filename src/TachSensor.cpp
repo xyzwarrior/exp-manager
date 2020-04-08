@@ -154,7 +154,7 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
                     std::istringstream kv(line);
                     std::getline(kv, key, '=');
                     std::getline(kv, value);
-                    if (this.name == key) {
+                    if (this->name == key) {
                         response = value;
                     }
                 }
