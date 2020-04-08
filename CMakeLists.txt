@@ -44,7 +44,7 @@ huntergate (URL "https://github.com/ruslo/hunter/archive/v0.18.64.tar.gz" SHA1
 project (expmanager CXX)
 
 set (EXTERNAL_PACKAGES Boost sdbusplus-project nlohmann-json)
-set (SENSOR_LINK_LIBS -lsystemd stdc++fs sdbusplus)
+set (SENSOR_LINK_LIBS -lsystemd stdc++fs sdbusplus phosphor_dbus)
 
 if (NOT YOCTO)
     set (DISABLE_NVME ON) # todo allow this to build out of tree
