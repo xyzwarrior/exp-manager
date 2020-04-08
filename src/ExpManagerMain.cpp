@@ -34,7 +34,7 @@ int main()
     std::string sensorName = "System_Fan01";
     std::string path = "/etc/sensor";
 
-    if (!std::filesystem::fileexists(path)) {
+    if (!std::filesystem::exists(path)) {
         std::ofstream ofs(path);
         ofs << sensorName << "=4890\n";
         ofs.close();
