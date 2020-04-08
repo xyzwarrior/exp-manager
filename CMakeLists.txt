@@ -138,6 +138,12 @@ target_link_libraries (expmanager gpiodcxx)
 target_link_libraries (expmanager ${PHOSPHOR_DBUS_})
 target_link_libraries (expmanager i2c)
 
+# Strip binary for release builds
+if (CMAKE_BUILD_TYPE STREQUAL Release)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_STRIP} ${PROJECT_NAME})
+endif ()
+
 if (NOT YOCTO)
     add_dependencies (expmanager ${EXTERNAL_PACKAGES})
 endif ()
