@@ -1,0 +1,11 @@
+[Unit]
+Description=SAS Expander Manager
+StopWhenUnneeded=false
+
+[Service]
+Restart=always
+RestartSec=5
+ExecStart=/usr/bin/expmanager
+
+[Install]
+WantedBy=multi-user.target
