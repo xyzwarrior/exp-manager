@@ -50,7 +50,8 @@ TachSensor::TachSensor(const std::string& path, const std::string& objectType,
                        const std::string& sensorConfiguration,
                        const std::pair<size_t, size_t>& limits) :
     Sensor(boost::replace_all_copy(fanName, " ", "_"), std::move(_thresholds),
-           sensorConfiguration, objectType, limits.second, limits.first),
+           sensorConfiguration, objectType, limits.second, limits.first,
+           sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit::RPMS),
     objServer(objectServer), redundancy(redundancy),
     presence(std::move(presenceSensor)),
     inputDev(io, open(path.c_str(), O_RDONLY)), waitTimer(io), path(path),
@@ -146,7 +147,17 @@ void TachSensor::handleResponse(const boost::system::error_code& err)
             std::string response;
             try
             {
-                std::getline(responseStream, response);
+                std::string line;
+                while (std::getline(responseStream, line))
+                {
+                    std::string key{""}, value{""};
+                    std::istringstream kv(line);
+                    std::getline(kv, key, '=');
+                    std::getline(kv, value);
+                    if (this.name == key) {
+                        response = value;
+                    }
+                }
                 double nvalue = std::stod(response);
                 responseStream.clear();
                 updateValue(nvalue);
