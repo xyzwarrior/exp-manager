@@ -121,7 +121,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_executable (expmanager
 	src/ExpManagerMain.cpp
     src/TachSensor.cpp
-    src/PwnSensor.cpp
+    src/PwmSensor.cpp
     src/Utils.cpp
     src/Thresholds.cpp
 )

@@ -7,6 +7,8 @@
 #include <sdbusplus/asio/object_server.hpp>
 #include <string>
 #include <vector>
+// phosphor-dbus-interface
+#include <xyz/openbmc_project/Sensor/Value/server.hpp>
 
 constexpr size_t sensorFailedPollTimeMs = 5000;
 
@@ -15,13 +17,18 @@ struct Sensor
 {
     Sensor(const std::string& name,
            std::vector<thresholds::Threshold>&& thresholdData,
-           const std::string& configurationPath, const std::string& objectType,
-           const double max, const double min) :
+           const std::string& configurationPath,
+           const std::string& objectType,
+           const double max,
+           const double min,
+           const sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit& unit = 
+            sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit::RPMS) :
         name(name),
         configurationPath(configurationPath), objectType(objectType),
         maxValue(max), minValue(min), thresholds(std::move(thresholdData)),
         hysteresisTrigger((max - min) * 0.01),
-        hysteresisPublish((max - min) * 0.0001)
+        hysteresisPublish((max - min) * 0.0001),
+        unit(unit)
     {
     }
     virtual ~Sensor() = default;
@@ -29,6 +36,7 @@ struct Sensor
     std::string name;
     std::string configurationPath;
     std::string objectType;
+    sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit unit;
     double maxValue;
     double minValue;
     std::vector<thresholds::Threshold> thresholds;
@@ -65,7 +73,7 @@ struct Sensor
                              size_t thresholdSize = 0)
     {
         createAssociation(association, configurationPath);
-
+        sensorInterface->register_property("Unit", unit);
         sensorInterface->register_property("MaxValue", maxValue);
         sensorInterface->register_property("MinValue", minValue);
         sensorInterface->register_property(
