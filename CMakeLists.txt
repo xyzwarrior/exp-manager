@@ -116,6 +116,12 @@ add_definitions (-DBOOST_ASIO_DISABLE_THREADS)
 
 link_directories (${EXTERNAL_INSTALL_LOCATION}/lib)
 
+# phosphor-dbus-interfaces
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DBUSINTERFACE phosphor-dbus-interfaces REQUIRED)
+include_directories(${DBUSINTERFACE_INCLUDE_DIRS})
+link_directories(${DBUSINTERFACE_LIBRARY_DIRS})
+
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable (expmanager
@@ -129,7 +135,7 @@ add_executable (expmanager
 add_dependencies (expmanager sdbusplus-project)
 target_link_libraries (expmanager ${SENSOR_LINK_LIBS})
 target_link_libraries (expmanager gpiodcxx)
-
+target_link_libraries (expmanager ${PHOSPHOR_DBUS_})
 target_link_libraries (expmanager i2c)
 
 if (NOT YOCTO)
