@@ -51,7 +51,8 @@ int main()
     std::unique_ptr<PresenceSensor> presenceSensor(nullptr);
     std::optional<RedundancySensor>* redundancy = nullptr;
     std::string interfacePath = "/xyz/openbmc_project/inventory/system/chassis/0";
-    tachSensors[sensorName] = std::make_unique<TachSensor>(
+
+    std::make_unique<TachSensor>(
             path,
             "xyz.openbmc_project.Configuration.I2CFan",
             objectServer, systemBus,
