@@ -21,8 +21,12 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <systemd/sd-event.h>
 
 static constexpr bool DEBUG = false;
+
+static constexpr const char* sensorType =
+    "xyz.openbmc_project.Configuration.I2CFan";
 
 int main()
 {
@@ -54,12 +58,41 @@ int main()
 
     std::make_unique<TachSensor>(
             path,
-            "xyz.openbmc_project.Configuration.I2CFan",
+            sensorType,
             objectServer, systemBus,
             std::move(presenceSensor),
             redundancy, io, sensorName,
             std::move(sensor_thresholds),
             interfacePath, limits);
+
+    boost::asio::deadline_timer filterTimer(io);
+    std::function<void(sdbusplus::message::message&)> eventHandler =
+        [&filterTimer, &io, &objectServer,
+         &systemBus](sdbusplus::message::message& message) {
+            // this implicitly cancels the timer
+            filterTimer.expires_from_now(boost::posix_time::seconds(1));
+
+            filterTimer.async_wait([&](const boost::system::error_code& ec) {
+                if (ec == boost::asio::error::operation_aborted)
+                {
+                    return; // we're being canceled
+                }
+                else if (ec)
+                {
+                    std::cerr << "Error: " << ec.message() << "\n";
+                    return;
+                }
+
+                // do nothing
+            });
+        };
+
+    sdbusplus::bus::match::match configMatch(
+        static_cast<sdbusplus::bus::bus&>(*systemBus),
+        "type='signal',member='PropertiesChanged',path_namespace='" +
+            std::string(inventoryPath) + "',arg0namespace='" +
+            std::string(sensorType) + "'",
+        eventHandler);
 
     io.run();
 }
