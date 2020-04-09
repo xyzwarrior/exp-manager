@@ -1,3 +1,4 @@
+#include "PwmSensor.hpp"
 #include "TachSensor.hpp"
 #include "Utils.hpp"
 #include "VariantVisitors.hpp"
