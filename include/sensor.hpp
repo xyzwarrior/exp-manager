@@ -73,7 +73,7 @@ struct Sensor
                              size_t thresholdSize = 0)
     {
         createAssociation(association, configurationPath);
-        sensorInterface->register_property("Unit", unit);
+        //sensorInterface->register_property("Unit", unit);
         sensorInterface->register_property("MaxValue", maxValue);
         sensorInterface->register_property("MinValue", minValue);
         sensorInterface->register_property(
