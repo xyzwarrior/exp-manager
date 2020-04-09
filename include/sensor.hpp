@@ -21,7 +21,7 @@ struct Sensor
            const std::string& objectType,
            const double max,
            const double min,
-           const sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit& unit = 
+           const sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit& unit =
             sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit::RPMS) :
         name(name),
         configurationPath(configurationPath), objectType(objectType),
@@ -73,7 +73,8 @@ struct Sensor
                              size_t thresholdSize = 0)
     {
         createAssociation(association, configurationPath);
-        //sensorInterface->register_property("Unit", unit);
+        // add Unit property
+        sensorInterface->register_property("Unit", unit);
         sensorInterface->register_property("MaxValue", maxValue);
         sensorInterface->register_property("MinValue", minValue);
         sensorInterface->register_property(
