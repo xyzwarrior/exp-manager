@@ -66,7 +66,7 @@ void createFanSensors(
     tachSensors[sensorName] = std::make_unique<TachSensor>(
                     path, baseType, objectServer, dbusConnection,
                     std::move(presenceSensor), redundancy, io, sensorName,
-                    std::move(sensorThresholds), *interfacePath, limits);
+                    std::move(sensorThresholds), interfacePath, limits);
 
                 // only add new elements
                 //const std::string& sysPath = pwm.string();
