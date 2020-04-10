@@ -153,6 +153,6 @@ set (SERVICE_FILE_INSTALL_DIR /lib/systemd/system/)
 
 install (TARGETS expmanager DESTINATION bin)
 install (FILES
-                 ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.expmanager.service
+                 ${SERVICE_FILE_SRC_DIR}/xyz.openbmc_project.ExpManager.service
                  DESTINATION ${SERVICE_FILE_INSTALL_DIR})
 
