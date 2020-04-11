@@ -79,6 +79,79 @@ void createFanSensors(
                 //                     objectServer, *path, "Fan")));
 }
 
+static std::shared_ptr<sdbusplus::asio::dbus_interface>
+    createInterface(sdbusplus::asio::object_server& objServer,
+                    const std::string& path, const std::string& interface)
+{
+    auto ptr = objServer.add_interface(path, interface);
+    return ptr;
+}
+
+void setSystemInfo(sdbusplus::asio::object_server& objServer)
+{
+    /* configuration sample
+    "Name": "WFP Baseboard",
+    "Probe": "xyz.openbmc_project.FruDevice({'PRODUCT_PRODUCT_NAME': '.*WFT'})",
+    "Type": "Board",
+    "xyz.openbmc_project.Inventory.Decorator.Asset": {
+        "Manufacturer": "$BOARD_MANUFACTURER",
+        "Model": "$BOARD_PRODUCT_NAME",
+        "PartNumber": "$BOARD_PART_NUMBER",
+        "SerialNumber": "$BOARD_SERIAL_NUMBER"
+    },
+    "xyz.openbmc_project.Inventory.Decorator.AssetTag": {
+        "AssetTag": "$PRODUCT_ASSET_TAG"
+    },
+    "xyz.openbmc_project.Inventory.Item.Board.Motherboard": {
+        "ProductId": 123
+    },
+    "xyz.openbmc_project.Inventory.Item.System": {}
+*/
+
+    std::string Name = "WFP Baseboard";
+    std::string boardType = "Board" // or Chassis
+
+    std::string boardKey = Name;// boardPair.value()["Name"];
+    std::string boardKeyOrig = Name; //boardPair.value()["Name"];
+    std::string boardtypeLower = boost::algorithm::to_lower_copy(boardType);
+
+    std::regex_replace(boardKey.begin(), boardKey.begin(), boardKey.end(),
+                           ILLEGAL_DBUS_MEMBER_REGEX, "_");
+    std::string boardName = "/xyz/openbmc_project/inventory/system/" +
+                                boardtypeLower + "/" + boardKey;
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> inventoryIface =
+            createInterface(objServer, boardName,
+                            "xyz.openbmc_project.Inventory.Item");
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> boardIface =
+            createInterface(objServer, boardName,
+                            "xyz.openbmc_project.Inventory.Item." + boardType);
+
+    boardIface->register_property("PartNumber", std::string("1234"));
+    boardIface->register_property("SerialNumber", std::string("ABCD"));
+    boardIface->initialize();
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> assetIface =
+                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Decorator.Asset");
+    assetIface->register_property("Manufacturer", std::string("Quantum"));
+    assetIface->register_property("Model", std::string("M1234"));
+    assetIface->register_property("PartNumber", std::string("P5678"));
+    assetIface->register_property("SerialNumber", std::string("SABCE"));
+    assetIface->initialize();
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> atagIface =
+                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Decorator.AssetTag");
+    atagIface->register_property("AssetTag", std::string("AT001"));
+    atagIface->initialize();
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> sysIface =
+                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Item.System");
+    sysIface->register_property("System", std::string("DSS2U12"));
+    sysIface->initialize();
+
+}
+
 int main()
 {
     boost::asio::io_service io;
@@ -92,6 +165,7 @@ int main()
         pwmSensors;
 
     io.post([&]() {
+        setSystemInfo(objectServer);
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
     });
 
