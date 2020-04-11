@@ -4,6 +4,9 @@
 #include "VariantVisitors.hpp"
 
 #include <array>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/container/flat_map.hpp>
@@ -23,6 +26,9 @@
 #include <variant>
 #include <vector>
 #include <systemd/sd-event.h>
+
+const std::regex ILLEGAL_DBUS_PATH_REGEX("[^A-Za-z0-9_.]");
+const std::regex ILLEGAL_DBUS_MEMBER_REGEX("[^A-Za-z0-9_]");
 
 static constexpr bool DEBUG = false;
 
@@ -109,7 +115,7 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
 */
 
     std::string Name = "WFP Baseboard";
-    std::string boardType = "Board" // or Chassis
+    std::string boardType = "Board"; // or Chassis
 
     std::string boardKey = Name;// boardPair.value()["Name"];
     std::string boardKeyOrig = Name; //boardPair.value()["Name"];
