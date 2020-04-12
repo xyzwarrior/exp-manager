@@ -2,6 +2,7 @@
 #include "TachSensor.hpp"
 #include "Utils.hpp"
 #include "VariantVisitors.hpp"
+#include "PSUSensor.hpp"
 
 #include <array>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -33,6 +34,37 @@ constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
 
 static constexpr bool DEBUG = false;
 
+static boost::container::flat_map<std::string, std::unique_ptr<PSUSensor>> psuSensors;
+
+void createPSUSensors(
+    boost::asio::io_service& io,
+    sdbusplus::asio::object_server& objectServer,
+    std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
+{
+    std::string sensorName = "psu0";
+    std::string sensorPathStr = "/etc/sensor";
+    std::string objectType = "xyz.openbmc_project.Sensor";
+    std::string sensorType = "power";
+    std::ofstream ofs(sensorPathStr, std::ios::app);
+    ofs << sensorName << "=110\n";
+    ofs.close();
+
+    std::vector<thresholds::Threshold> sensorThresholds;
+    auto t = thresholds::Threshold(thresholds::Level::CRITICAL,
+                                   thresholds::Direction::LOW, 100);
+    sensorThresholds.emplace_back(t);
+    const std::string interfacePath = "/xyz/openbmc_project/inventory/system/chassis/0";
+    psuSensors[sensorName] = std::make_unique<PSUSensor>(
+                sensorPathStr, objectType, objectServer, dbusConnection, io,
+                sensorName, std::move(sensorThresholds), interfacePath,
+                sensorType,
+                1, //factor
+                120.0, // maxReading
+                100.0, // minReading
+                "",
+                0);
+}
+
 void createFanSensors(
     boost::asio::io_service& io,
     sdbusplus::asio::object_server& objectServer,
@@ -50,11 +82,11 @@ void createFanSensors(
     std::string sensorName = "System_Fan01";
     std::string path = "/etc/sensor";
 
-    if (!std::filesystem::exists(path)) {
-        std::ofstream ofs(path);
+    //if (!std::filesystem::exists(path)) {
+        std::ofstream ofs(path, std::ios::app);
         ofs << sensorName << "=4890\n";
         ofs.close();
-    }
+    //}
 
     constexpr double defaultMaxReading = 25000;
     constexpr double defaultMinReading = 0;
@@ -238,6 +270,7 @@ int main()
         setSystemInfo(objectServer);
         setPowerSupplyInfo(objectServer);
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
+        createPSUSensors(io, objectServer, systemBus);
     });
 
 
