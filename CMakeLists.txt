@@ -128,6 +128,9 @@ add_executable (expmanager
 	src/ExpManagerMain.cpp
     src/TachSensor.cpp
     src/PwmSensor.cpp
+    src/PSUSensor.cpp
+    src/ADCSensor.cpp
+    src/HwmonTempSensor.cpp
     src/Utils.cpp
     src/Thresholds.cpp
 )
