@@ -111,6 +111,42 @@ void setProperty(sdbusplus::bus::bus& bus,
     return;
 }
 
+void setPowerSupplyInfo(sdbusplus::asio::object_server& objServer)
+{
+    std::string Name = "Delta DPS-750XB A";
+    std::string boardType = "PowerSupply";
+
+    std::string boardKey = Name;
+    std::string boardKeyOrig = Name;
+    std::string boardtypeLower = boost::algorithm::to_lower_copy(boardType);
+
+    std::regex_replace(boardKey.begin(), boardKey.begin(), boardKey.end(),
+                           ILLEGAL_DBUS_MEMBER_REGEX, "_");
+    std::string boardName = "/xyz/openbmc_project/inventory/system/" +
+                                boardtypeLower + "/" + boardKey;
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> inventoryIface =
+            createInterface(objServer, boardName,
+                            "xyz.openbmc_project.Inventory.Item");
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> boardIface =
+            createInterface(objServer, boardName,
+                            "xyz.openbmc_project.Inventory.Item." + boardType);
+
+    boardIface->register_property("PartNumber", std::string("1234"));
+    boardIface->register_property("SerialNumber", std::string("ABCD"));
+    boardIface->initialize();
+
+    std::shared_ptr<sdbusplus::asio::dbus_interface> assetIface =
+                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Decorator.Asset");
+    assetIface->register_property("Manufacturer", std::string("Delta"));
+    assetIface->register_property("Model", std::string("DPS-750XB"));
+    assetIface->register_property("PartNumber", std::string("P5678"));
+    assetIface->register_property("SerialNumber", std::string("S1234"));
+    assetIface->initialize();
+
+}
+
 void setSystemInfo(sdbusplus::asio::object_server& objServer)
 {
     /* configuration sample
@@ -132,7 +168,7 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
     "xyz.openbmc_project.Inventory.Item.System": {}
 */
 
-    std::string Name = "WFP Baseboard";
+    std::string Name = "Expander 0";
     std::string boardType = "Board"; // or Chassis
 
     std::string boardKey = Name;// boardPair.value()["Name"];
@@ -173,7 +209,6 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
                     createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Item.System");
     sysIface->register_property("System", std::string("DSS2U12"));
     sysIface->initialize();
-
 }
 
 int main()
@@ -201,6 +236,7 @@ int main()
 
     io.post([&]() {
         setSystemInfo(objectServer);
+        setPowerSupplyInfo(objectServer);
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
     });
 
