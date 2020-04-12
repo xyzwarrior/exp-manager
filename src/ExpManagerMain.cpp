@@ -29,6 +29,7 @@
 
 const std::regex ILLEGAL_DBUS_PATH_REGEX("[^A-Za-z0-9_.]");
 const std::regex ILLEGAL_DBUS_MEMBER_REGEX("[^A-Za-z0-9_]");
+constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
 
 static constexpr bool DEBUG = false;
 
@@ -91,6 +92,23 @@ static std::shared_ptr<sdbusplus::asio::dbus_interface>
 {
     auto ptr = objServer.add_interface(path, interface);
     return ptr;
+}
+
+void setProperty(sdbusplus::bus::bus& bus,
+                const std::string& service,
+                const std::string& path,
+                 const std::string& interface, const std::string& property,
+                 const std::string& value)
+{
+    sdbusplus::message::variant<std::string> variantValue = value;
+
+    auto method = bus.new_method_call(service.c_str(), path.c_str(),
+                                      PROPERTY_INTERFACE, "Set");
+
+    method.append(interface, property, variantValue);
+    bus.call_noreply(method);
+
+    return;
 }
 
 void setSystemInfo(sdbusplus::asio::object_server& objServer)
@@ -160,6 +178,17 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
 
 int main()
 {
+    auto bus = sdbusplus::bus::new_default();
+    std::string service = "xyz.openbmc_project.Inventory.Manager";
+    std::string objPath = "/xyz/openbmc_project/inventory/system";
+    std::string objIface = "xyz.openbmc_project.Inventory.Decorator.Asset";
+
+    setProperty(bus, service, objPath, objIface, "Model", std::string("DSS2U12"));
+    setProperty(bus, service, objPath, objIface, "Manufacturer",
+        std::string("Quantum"));
+    setProperty(bus, service, objPath, objIface, "SerialNumber",
+        std::string("S1234FEDC"));
+
     boost::asio::io_service io;
     auto systemBus = std::make_shared<sdbusplus::asio::connection>(io);
     systemBus->request_name("xyz.openbmc_project.ExpManager");
