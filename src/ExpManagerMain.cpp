@@ -170,7 +170,8 @@ void setPowerSupplyInfo(sdbusplus::asio::object_server& objServer)
     boardIface->initialize();
 
     std::shared_ptr<sdbusplus::asio::dbus_interface> assetIface =
-                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Decorator.Asset");
+                    createInterface(objServer, boardName,
+                        "xyz.openbmc_project.Inventory.Decorator.Asset");
     assetIface->register_property("Manufacturer", std::string("Delta"));
     assetIface->register_property("Model", std::string("DPS-750XB"));
     assetIface->register_property("PartNumber", std::string("P5678"));
@@ -225,7 +226,8 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
     boardIface->initialize();
 
     std::shared_ptr<sdbusplus::asio::dbus_interface> assetIface =
-                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Decorator.Asset");
+                    createInterface(objServer, boardName,
+                        "xyz.openbmc_project.Inventory.Decorator.Asset");
     assetIface->register_property("Manufacturer", std::string("Quantum"));
     assetIface->register_property("Model", std::string("M1234"));
     assetIface->register_property("PartNumber", std::string("P5678"));
@@ -233,12 +235,14 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
     assetIface->initialize();
 
     std::shared_ptr<sdbusplus::asio::dbus_interface> atagIface =
-                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Decorator.AssetTag");
+                    createInterface(objServer, boardName,
+                        "xyz.openbmc_project.Inventory.Decorator.AssetTag");
     atagIface->register_property("AssetTag", std::string("AT001"));
     atagIface->initialize();
 
     std::shared_ptr<sdbusplus::asio::dbus_interface> sysIface =
-                    createInterface(objServer, boardName, "xyz.openbmc_project.Inventory.Item.System");
+                    createInterface(objServer, boardName,
+                        "xyz.openbmc_project.Inventory.Item.System");
     sysIface->register_property("System", std::string("DSS2U12"));
     sysIface->initialize();
 }
@@ -267,7 +271,7 @@ int main()
         pwmSensors;
 
     io.post([&]() {
-        setSystemInfo(objectServer);
+        //setSystemInfo(objectServer);
         setPowerSupplyInfo(objectServer);
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
         createPSUSensors(io, objectServer, systemBus);
