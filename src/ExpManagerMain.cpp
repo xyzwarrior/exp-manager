@@ -242,11 +242,11 @@ void setSystemInfo(sdbusplus::asio::object_server& objServer)
     atagIface->register_property("AssetTag", std::string("AT001"));
     atagIface->initialize();
 
-    std::shared_ptr<sdbusplus::asio::dbus_interface> sysIface =
-                    createInterface(objServer, boardName,
-                        "xyz.openbmc_project.Inventory.Item.System");
-    sysIface->register_property("System", std::string("DSS2U12"));
-    sysIface->initialize();
+    //std::shared_ptr<sdbusplus::asio::dbus_interface> sysIface =
+    //                createInterface(objServer, boardName,
+    //                    "xyz.openbmc_project.Inventory.Item.System");
+    //sysIface->register_property("System", std::string("DSS2U12"));
+    //sysIface->initialize();
 }
 
 int main()
@@ -273,8 +273,8 @@ int main()
         pwmSensors;
 
     io.post([&]() {
-        //setSystemInfo(objectServer);
-        setPowerSupplyInfo(objectServer);
+        setSystemInfo(objectServer);
+        //setPowerSupplyInfo(objectServer);
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
         createPSUSensors(io, objectServer, systemBus);
     });
