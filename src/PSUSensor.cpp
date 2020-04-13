@@ -44,7 +44,8 @@ PSUSensor::PSUSensor(const std::string& path, const std::string& objectType,
                      double max, double min, const std::string& label,
                      size_t tSize) :
     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
-           std::move(_thresholds), sensorConfiguration, objectType, max, min),
+           std::move(_thresholds), sensorConfiguration, objectType, max, min,
+            sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit::Watts),
     objServer(objectServer), inputDev(io), waitTimer(io), path(path),
     errCount(0), sensorFactor(factor)
 {
@@ -131,6 +132,16 @@ void PSUSensor::handleResponse(const boost::system::error_code& err)
         std::string response;
         try
         {
+            std::string line;
+            while (std::getline(responseStream, line)) {
+                std::string key{""}, value{""};
+                std::istringstream kv(line);
+                std::getline(kv, key, '=');
+                std::getline(kv, value);
+                if (this->name == key) {
+                    response = value;
+                }
+            }
             std::getline(responseStream, response);
             double nvalue = std::stod(response);
             responseStream.clear();

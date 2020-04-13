@@ -44,7 +44,7 @@ void createPSUSensors(
     std::string sensorName = "psu0";
     std::string sensorPathStr = "/etc/sensor";
     std::string objectType = "xyz.openbmc_project.Sensor";
-    std::string sensorType = "power";
+    std::string sensorType = "power/";
     std::ofstream ofs(sensorPathStr, std::ios::app);
     ofs << sensorName << "=110\n";
     ofs.close();
@@ -53,7 +53,8 @@ void createPSUSensors(
     auto t = thresholds::Threshold(thresholds::Level::CRITICAL,
                                    thresholds::Direction::LOW, 100);
     sensorThresholds.emplace_back(t);
-    const std::string interfacePath = "/xyz/openbmc_project/inventory/system/chassis/0";
+    const std::string interfacePath =
+        "/xyz/openbmc_project/inventory/system/chassis/0";
     psuSensors[sensorName] = std::make_unique<PSUSensor>(
                 sensorPathStr, objectType, objectServer, dbusConnection, io,
                 sensorName, std::move(sensorThresholds), interfacePath,
@@ -76,7 +77,8 @@ void createFanSensors(
 {
 
 
-    const std::string interfacePath = "/xyz/openbmc_project/inventory/system/chassis/0";
+    const std::string interfacePath =
+        "/xyz/openbmc_project/inventory/system/chassis/0";
     const std::string baseType = "xyz.openbmc_project.Configuration.I2CFan";
 
     std::string sensorName = "System_Fan01";
@@ -161,13 +163,13 @@ void setPowerSupplyInfo(sdbusplus::asio::object_server& objServer)
             createInterface(objServer, boardName,
                             "xyz.openbmc_project.Inventory.Item");
 
-    std::shared_ptr<sdbusplus::asio::dbus_interface> boardIface =
-            createInterface(objServer, boardName,
-                            "xyz.openbmc_project.Inventory.Item." + boardType);
+    //std::shared_ptr<sdbusplus::asio::dbus_interface> boardIface =
+    //        createInterface(objServer, boardName,
+    //                        "xyz.openbmc_project.Inventory.Item." + boardType);
 
-    boardIface->register_property("PartNumber", std::string("1234"));
-    boardIface->register_property("SerialNumber", std::string("ABCD"));
-    boardIface->initialize();
+    //boardIface->register_property("PartNumber", std::string("1234"));
+    //boardIface->register_property("SerialNumber", std::string("ABCD"));
+    //boardIface->initialize();
 
     std::shared_ptr<sdbusplus::asio::dbus_interface> assetIface =
                     createInterface(objServer, boardName,

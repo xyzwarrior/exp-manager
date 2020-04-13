@@ -46,7 +46,9 @@ HwmonTempSensor::HwmonTempSensor(
     const std::string& sensorConfiguration, const PowerState powerState) :
     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
            std::move(_thresholds), sensorConfiguration, objectType, maxReading,
-           minReading),
+           minReading,
+           sdusplus::xyz::openbmc_project::Sensor::server::Value::Unit::DegreesC
+    ),
     std::enable_shared_from_this<HwmonTempSensor>(), objServer(objectServer),
     inputDev(io, open(path.c_str(), O_RDONLY)), waitTimer(io), path(path),
     errCount(0), readState(powerState)
@@ -112,9 +114,18 @@ void HwmonTempSensor::handleResponse(const boost::system::error_code& err)
     if (!err)
     {
         std::string response;
-        std::getline(responseStream, response);
         try
         {
+            std::string line;
+            while (std::getline(responseStream, line)) {
+                std::string key{""}, value{""};
+                std::istringstream kv(line);
+                std::getline(kv, key, '=');
+                std::getline(kv, value);
+                if (this->name == key) {
+                    response = value;
+                }
+            }
             double nvalue = std::stod(response);
             nvalue /= sensorScaleFactor;
             updateValue(nvalue);
