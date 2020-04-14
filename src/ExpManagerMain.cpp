@@ -45,7 +45,7 @@ void createADCSensors(boost::asio::io_service& io,
 {
     std::string sensorName = "volt0";
     std::string sensorPath = "/etc/sensor";
-    std::ofstream ofs(sensorPathStr, std::ios::app);
+    std::ofstream ofs(sensorPath, std::ios::app);
     ofs << sensorName << "=12\n";
     ofs.close();
     std::string objectType = "xyz.openbmc_project.Sensor";
@@ -55,9 +55,9 @@ void createADCSensors(boost::asio::io_service& io,
     sensorThresholds.emplace_back(t);
     const std::string interfacePath =
         "/xyz/openbmc_project/inventory/system/chassis/0";
-    adcSensor[sensorName] = std::make_unique<ADCSensor>(
+    adcSensors[sensorName] = std::make_unique<ADCSensor>(
                     sensorPath, objectServer, dbusConnection, io, sensorName,
-                    std::move(sensorThresholds), 1000, PowerState::On,
+                    std::move(sensorThresholds), 1000, PowerState::on,
                     interfacePath, nullptr);
 }
 
