@@ -46,7 +46,7 @@ void createTempSensors(boost::asio::io_service& io,
 {
     std::string sensorName = "temp0";
     std::string sensorPath = "/etc/sensor";
-    std::ofsteam ofs(sensorPath, std::ios::app);
+    std::ofstream ofs(sensorPath, std::ios::app);
     ofs << sensorName << "=25\n";
     ofs.close();
     std::string objectType = "xyz.openbmc_project.Sensor";
@@ -57,7 +57,7 @@ void createTempSensors(boost::asio::io_service& io,
     const std::string interfacePath =
         "/xyz/openbmc_project/inventory/system/chassis/0";
     tempSensors[sensorName] = std::make_shared<HwmonTempSensor>(
-                        path,
+                        sensorPath,
                         sensorType, objectServer, dbusConnection, io,
                         sensorName, std::move(sensorThresholds),
                         interfacePath, PowerState::on);
