@@ -38,7 +38,7 @@ static constexpr bool DEBUG = false;
 
 static boost::container::flat_map<std::string, std::unique_ptr<PSUSensor>> psuSensors;
 static boost::container::flat_map<std::string, std::unique_ptr<ADCSensor>> adcSensors;
-static boost::container::flat_map<std::string, std::share_ptr<HwmonTempSensor>> tempSensors;
+static boost::container::flat_map<std::string, std::shared_ptr<HwmonTempSensor>> tempSensors;
 
 void createTempSensors(boost::asio::io_service& io,
     sdbusplus::asio::object_server& objectServer,
