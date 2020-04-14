@@ -38,6 +38,31 @@ static constexpr bool DEBUG = false;
 
 static boost::container::flat_map<std::string, std::unique_ptr<PSUSensor>> psuSensors;
 static boost::container::flat_map<std::string, std::unique_ptr<ADCSensor>> adcSensors;
+static boost::container::flat_map<std::string, std::unique_ptr<HwmonTempSensor>> tempSensors;
+
+void createTempSensors(boost::asio::io_service& io,
+    sdbusplus::asio::object_server& objectServer,
+    std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
+{
+    std::string sensorName = "temp0";
+    std::string sensorPath = "/etc/sensor";
+    std::ofsteam ofs(sensorPath, std::ios::app);
+    ofs << sensorName << "=25\n";
+    ofs.close();
+    std::string objectType = "xyz.openbmc_project.Sensor";
+    std::vector<thresholds::Threshold> sensorThresholds;
+    auto t = thresholds::Threshold(thresholds::Level::CRITICAL,
+                                   thresholds::Direction::HIGH, 100);
+    sensorThresholds.emplace_back(t);
+    const std::string interfacePath =
+        "/xyz/openbmc_project/inventory/system/chassis/0";
+    tempSensors[sensorName] = std::make_shared<HwmonTempSensor>(
+                        path,
+                        sensorType, objectServer, dbusConnection, io,
+                        sensorName, std::move(sensorThresholds),
+                        interfacePath, PowerState::on);
+    tempSensors[sensorName]->setupRead();
+}
 
 void createADCSensors(boost::asio::io_service& io,
     sdbusplus::asio::object_server& objectServer,
@@ -304,6 +329,7 @@ int main()
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
         createPSUSensors(io, objectServer, systemBus);
         createADCSensors(io, objectServer, systemBus);
+        createTempSensors(io, objectServer, systemBus);
     });
 
 

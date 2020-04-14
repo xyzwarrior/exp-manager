@@ -182,9 +182,9 @@ void HwmonTempSensor::handleResponse(const boost::system::error_code& err)
 
 void HwmonTempSensor::checkThresholds(void)
 {
-    if (readState == PowerState::on && !isPowerOn())
-    {
-        return;
-    }
+    //if (readState == PowerState::on && !isPowerOn())
+    //{
+    //    return;
+    //}
     thresholds::checkThresholds(this);
 }
