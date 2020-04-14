@@ -53,7 +53,9 @@ ADCSensor::ADCSensor(const std::string& path,
                      std::optional<BridgeGpio>&& bridgeGpio) :
     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
            std::move(_thresholds), sensorConfiguration,
-           "xyz.openbmc_project.Configuration.ADC", maxReading, minReading),
+           "xyz.openbmc_project.Configuration.ADC", maxReading, minReading,
+            sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit::Volts
+    ),
     objServer(objectServer), inputDev(io, open(path.c_str(), O_RDONLY)),
     waitTimer(io), path(path), errCount(0), scaleFactor(scaleFactor),
     bridgeGpio(std::move(bridgeGpio)), readState(std::move(readState)),
@@ -80,7 +82,7 @@ ADCSensor::ADCSensor(const std::string& path,
     setupRead();
 
     // setup match
-    setupPowerMatch(conn);
+    //setupPowerMatch(conn);
 }
 
 ADCSensor::~ADCSensor()
@@ -96,6 +98,7 @@ ADCSensor::~ADCSensor()
 
 void ADCSensor::setupRead(void)
 {
+    /*
     if (bridgeGpio.has_value())
     {
         (*bridgeGpio).set(1);
@@ -113,10 +116,11 @@ void ADCSensor::setupRead(void)
             boost::asio::async_read_until(
                 inputDev, readBuf, '\n',
                 [&](const boost::system::error_code& ec,
-                    std::size_t /*bytes_transfered*/) { handleResponse(ec); });
+                    std::size_t bytes_transfered) { handleResponse(ec); });
         });
     }
     else
+    */
     {
         boost::asio::async_read_until(
             inputDev, readBuf, '\n',
@@ -136,11 +140,22 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
     if (!err)
     {
         std::string response;
-        std::getline(responseStream, response);
-
         // todo read scaling factors from configuration
         try
         {
+            std::string line;
+            while (std::getline(responseStream, line))
+            {
+                std::string key{""}, value{""};
+                std::istringstream kv(line);
+                std::getline(kv, key, '=');
+                std::getline(kv, value);
+                if (this->name == key) {
+                    response = value;
+                }
+            }
+
+
             double nvalue = std::stod(response);
 
             nvalue = (nvalue / sensorScaleFactor) / scaleFactor;
@@ -177,10 +192,10 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
 
     responseStream.clear();
     inputDev.close();
-    if (bridgeGpio.has_value())
-    {
-        (*bridgeGpio).set(0);
-    }
+    //if (bridgeGpio.has_value())
+    //{
+    //    (*bridgeGpio).set(0);
+    //}
     int fd = open(path.c_str(), O_RDONLY);
     if (fd < 0)
     {
@@ -199,10 +214,10 @@ void ADCSensor::handleResponse(const boost::system::error_code& err)
 
 void ADCSensor::checkThresholds(void)
 {
-    if (readState == PowerState::on && !isPowerOn())
-    {
-        return;
-    }
+    //if (readState == PowerState::on && !isPowerOn())
+    //{
+    //    return;
+    //}
 
     thresholds::checkThresholdsPowerDelay(this, thresholdTimer);
 }

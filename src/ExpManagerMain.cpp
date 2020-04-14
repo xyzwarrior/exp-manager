@@ -3,6 +3,8 @@
 #include "Utils.hpp"
 #include "VariantVisitors.hpp"
 #include "PSUSensor.hpp"
+#include "ADCSensor.hpp"
+#include "HwmonTempSensor.hpp"
 
 #include <array>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -35,6 +37,29 @@ constexpr auto PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
 static constexpr bool DEBUG = false;
 
 static boost::container::flat_map<std::string, std::unique_ptr<PSUSensor>> psuSensors;
+static boost::container::flat_map<std::string, std::unique_ptr<ADCSensor>> adcSensors;
+
+void createADCSensors(boost::asio::io_service& io,
+    sdbusplus::asio::object_server& objectServer,
+    std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
+{
+    std::string sensorName = "volt0";
+    std::string sensorPath = "/etc/sensor";
+    std::ofstream ofs(sensorPathStr, std::ios::app);
+    ofs << sensorName << "=12\n";
+    ofs.close();
+    std::string objectType = "xyz.openbmc_project.Sensor";
+    std::vector<thresholds::Threshold> sensorThresholds;
+    auto t = thresholds::Threshold(thresholds::Level::CRITICAL,
+                                   thresholds::Direction::LOW, 10);
+    sensorThresholds.emplace_back(t);
+    const std::string interfacePath =
+        "/xyz/openbmc_project/inventory/system/chassis/0";
+    adcSensor[sensorName] = std::make_unique<ADCSensor>(
+                    sensorPath, objectServer, dbusConnection, io, sensorName,
+                    std::move(sensorThresholds), 1000, PowerState::On,
+                    interfacePath, nullptr);
+}
 
 void createPSUSensors(
     boost::asio::io_service& io,
@@ -277,6 +302,7 @@ int main()
         //setPowerSupplyInfo(objectServer);
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
         createPSUSensors(io, objectServer, systemBus);
+        createADCSensors(io, objectServer, systemBus);
     });
 
 
