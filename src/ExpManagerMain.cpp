@@ -128,8 +128,6 @@ void createFanSensors(
         pwmSensors,
     std::shared_ptr<sdbusplus::asio::connection>& dbusConnection)
 {
-
-
     const std::string interfacePath =
         "/xyz/openbmc_project/inventory/system/chassis/0";
     const std::string baseType = "xyz.openbmc_project.Configuration.I2CFan";
@@ -326,8 +324,8 @@ int main()
         pwmSensors;
 
     io.post([&]() {
-        setSystemInfo(objectServer);
-        //setPowerSupplyInfo(objectServer);
+        //setSystemInfo(objectServer); // for expaners
+        //setPowerSupplyInfo(objectServer); // for power supplies
         createFanSensors(io, objectServer, tachSensors, pwmSensors, systemBus);
         createPSUSensors(io, objectServer, systemBus);
         createADCSensors(io, objectServer, systemBus);
