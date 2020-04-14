@@ -47,7 +47,7 @@ HwmonTempSensor::HwmonTempSensor(
     Sensor(boost::replace_all_copy(sensorName, " ", "_"),
            std::move(_thresholds), sensorConfiguration, objectType, maxReading,
            minReading,
-           sdusplus::xyz::openbmc_project::Sensor::server::Value::Unit::DegreesC
+           sdbusplus::xyz::openbmc_project::Sensor::server::Value::Unit::DegreesC
     ),
     std::enable_shared_from_this<HwmonTempSensor>(), objServer(objectServer),
     inputDev(io, open(path.c_str(), O_RDONLY)), waitTimer(io), path(path),
