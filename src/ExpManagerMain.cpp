@@ -58,7 +58,7 @@ void createTempSensors(boost::asio::io_service& io,
         "/xyz/openbmc_project/inventory/system/chassis/0";
     tempSensors[sensorName] = std::make_shared<HwmonTempSensor>(
                         sensorPath,
-                        sensorType, objectServer, dbusConnection, io,
+                        objectType, objectServer, dbusConnection, io,
                         sensorName, std::move(sensorThresholds),
                         interfacePath, PowerState::on);
     tempSensors[sensorName]->setupRead();
