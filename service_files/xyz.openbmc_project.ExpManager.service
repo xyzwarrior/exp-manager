@@ -1,6 +1,8 @@
 [Unit]
 Description=SAS Expander Manager
 StopWhenUnneeded=false
+Requires=xyz.openbmc_project.Inventory.Manager.service
+After=xyz.openbmc_project.Inventory.Manager.service
 
 [Service]
 Restart=always
