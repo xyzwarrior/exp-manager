@@ -55,10 +55,11 @@ void createADCSensors(boost::asio::io_service& io,
     sensorThresholds.emplace_back(t);
     const std::string interfacePath =
         "/xyz/openbmc_project/inventory/system/chassis/0";
+    std::optional<BridgeGpio> bridgeGpio;
     adcSensors[sensorName] = std::make_unique<ADCSensor>(
                     sensorPath, objectServer, dbusConnection, io, sensorName,
                     std::move(sensorThresholds), 1000, PowerState::on,
-                    interfacePath, nullptr);
+                    interfacePath, std::move(bridgeGpio));
 }
 
 void createPSUSensors(
